@@ -1,10 +1,15 @@
-import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+//import Login from './components/Login';
+import GoogleSignInButton from './components/GoogleSignInButton';
+import Calendar from './components/Calendar';
+
 function App() {
+
   return (
     <div className="App">
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -19,6 +24,9 @@ function App() {
           Learn React
         </a>
       </header>
+
+      <GoogleSignInButton />
+      <Calendar />
     </div>
   );
 }
