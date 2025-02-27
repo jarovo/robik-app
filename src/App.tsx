@@ -1,15 +1,32 @@
 import logo from './logo.svg';
 import './App.css';
 
-//import Login from './components/Login';
-import GoogleSignInButton from './components/GoogleSignInButton';
-import Calendar from './components/Calendar';
+import React, { useState } from 'react';
+import Login from './components/Login';
+import Calendar from './components/Calendar'; // Your component to display calendar events
+import GoogleLoginButton from './components/GoogleLoginButton';
 
-function App() {
+const App: React.FC = () => {
+  const [token, setToken] = useState<string | null>(null);
+
+  const handleLoginSuccess = (credential: string) => {
+    // Verify the credential on your backend and obtain an access token
+    // For demonstration, we'll assume the credential is the access token
+    setToken(credential);
+  };
 
   return (
     <div className="App">
-      <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+      <div>   
+        <GoogleLoginButton onLoginSuccess={handleLoginSuccess} />
+        {!token ? (
+          "Please log in"
+        ) : (
+          <Calendar token={token} />
+        )}
+      </div>
+
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -23,10 +40,7 @@ function App() {
         >
           Learn React
         </a>
-      </header>
-
-      <GoogleSignInButton />
-      <Calendar />
+      </header>      
     </div>
   );
 }
