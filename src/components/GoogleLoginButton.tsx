@@ -3,9 +3,11 @@ import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 
 interface LoginProps {
     onLoginSuccess: (token: string) => void;
+    onLogout: () => void;
   }
 
-const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess })=> {
+
+const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess, onLogout })=> {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
         console.log("Access Token:", tokenResponse.access_token)
@@ -18,7 +20,7 @@ const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess })=> {
   return (
     <div>
       <button onClick={() => login()}>Sign in with Google</button>
-      <button onClick={() => googleLogout()}>Logout</button>
+      <button onClick={onLogout}>Logout</button>
     </div>
   );
 };

@@ -15,11 +15,15 @@ const App: React.FC = () => {
     setToken(credential);
   };
 
+  const handleLogout = () => {
+    setToken(null)
+  }
+
   return (
     <div className="App">
 
       <div>   
-        <GoogleLoginButton onLoginSuccess={handleLoginSuccess} />
+        <GoogleLoginButton onLoginSuccess={handleLoginSuccess} onLogout={handleLogout} />
         {!token ? (
           "Please log in"
         ) : (
