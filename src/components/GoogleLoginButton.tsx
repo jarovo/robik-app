@@ -10,7 +10,6 @@ interface LoginProps {
 const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess, onLogout })=> {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
-        console.log("Access Token:", tokenResponse.access_token)
         onLoginSuccess(tokenResponse.access_token);
     },
     onError: () => console.log("Login Failed"),
