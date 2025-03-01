@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const clientId = process.env.REACT_APP_GAPI_CLIENT_ID as string;
 

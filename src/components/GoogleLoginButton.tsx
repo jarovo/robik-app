@@ -7,6 +7,11 @@ interface LoginProps {
   }
 
 
+const logout = () => {
+  googleLogout()
+}
+
+
 const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess, onLogout })=> {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
@@ -19,7 +24,7 @@ const GoogleLoginButton: React.FC<LoginProps> = ({ onLoginSuccess, onLogout })=>
   return (
     <div>
       <button onClick={() => login()}>Sign in with Google</button>
-      <button onClick={onLogout}>Logout</button>
+      <button onClick={logout}>Logout</button>
     </div>
   );
 };
