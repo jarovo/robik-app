@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Table from 'react-bootstrap/Table';
 
 interface CalendarProps {
   token: string;
@@ -74,25 +75,44 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
   return (
     <div>
       <h2>Events</h2>
-        <InputGroup>
-          <label>Calendar<input name="calendar" type="text" onChange={e => setCalendar(e.target.value)} defaultValue={calendar}/></label>
-          <label>Query<input name="query" type="text" onChange={e => setQuery(e.target.value)} defaultValue={query}/></label>
-          <label>Date since <input name="date since" type="date" onChange={e => setDateSince(new Date(e.target.value))}/></label> 
-          <label>Date until <input name="date until" type="date" onChange={e => setDateUntil(new Date(e.target.value))}/></label>
-        </InputGroup>
-        <div>
-          {events.map((event) => (
-            <>
-                <InputGroup className="mb-3">                  
+      <InputGroup>
+        <label>Calendar<input name="calendar" type="text" onChange={e => setCalendar(e.target.value)} defaultValue={calendar}/></label>
+        <label>Query<input name="query" type="text" onChange={e => setQuery(e.target.value)} defaultValue={query}/></label>
+        <label>Date since <input name="date since" type="date" onChange={e => setDateSince(new Date(e.target.value))}/></label> 
+        <label>Date until <input name="date until" type="date" onChange={e => setDateUntil(new Date(e.target.value))}/></label>
+      </InputGroup>
+      <div>
+        <Table>
+          <thead>
+            <td>Select</td>
+            <td>Since</td>
+            <td>Until</td>
+            <td>Hours</td>
+            <td>Summary</td>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr>
+                <td>
                   <InputGroup.Checkbox aria-label="Checkbox for following text input" />
-                  <InputGroup.Text>{
-                  (new Date(event.start.dateTime).toLocaleString()) + ' - ' + (new Date(event.end.dateTime).toLocaleString())}
-                  </InputGroup.Text>
-                    <Form.Control aria-label="Apperance in invoice" defaultValue={event.summary} />
-                </InputGroup>
-            </>
-          ))}
-        </div>
+                </td>
+                <td>
+                  {new Date(event.start.dateTime).toLocaleString()}
+                </td>
+                <td>
+                  {new Date(event.end.dateTime).toLocaleString()}
+                </td>
+                <td>
+                  {(((new Date(event.end.dateTime).getTime())-(new Date(event.start.dateTime).getTime()))/1000/60/60).toString()}
+                </td>
+                <td>
+                  <Form.Control aria-label="Apperance in invoice" defaultValue={event.summary} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     </div>
   );
 }
