@@ -19,6 +19,37 @@ interface Event {
   };
 }
 
+interface Etag {
+  etag: string
+}
+
+interface Response {
+  "kind": "calendar#events",
+  "etag": Etag,
+  "summary": string,
+  "description": string,
+  "updated": Date,
+  "timeZone": string,
+  "accessRole": string,
+  "defaultReminders": [
+    {
+      "method": string,
+      "minutes": Number
+    }
+  ],
+  "nextPageToken": string,
+  "nextSyncToken": string,
+  "items": [Event]
+}
+
+
+const getHours = (event: Event) => {
+  const endTime = new Date(event.end.dateTime).getTime()
+  const startTime = new Date(event.start.dateTime).getTime()
+  return endTime - startTime
+}
+
+
 const Calendar: React.FC<CalendarProps> = ({token}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [dateSince, setDateSince] = useState<Date>(new Date())
@@ -49,24 +80,28 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
     };
 
     const listUpcomingEvents = async () => {
-      try {
-        const response = await window.gapi.client.calendar.events.list({
-          calendarId: calendar,
-          q: query,
-          timeMin: dateSince.toISOString(),
-          timeMax: dateUntil.toISOString(),
-          showDeleted: false,
-          singleEvents: true,
-          maxResults: 10,
-          orderBy: 'startTime',
-        });
-
-        const events = response.result.items as Event[];
-        setEvents(events);
-      } catch (error) {
-        console.error('Error fetching events', error);
-        return
-      }
+      let nextPageToken: string | undefined
+      let events: Array<Event> = []
+      do {
+        try {
+          const response = await window.gapi.client.calendar.events.list({
+            calendarId: calendar,
+            q: query,
+            timeMin: dateSince.toISOString(),
+            timeMax: dateUntil.toISOString(),
+            showDeleted: false,
+            singleEvents: true,
+            orderBy: 'startTime',
+            pageToken: nextPageToken
+          });
+          nextPageToken = response.result.nextPageToken
+          events = events.concat(response.result.items as Event[])
+        } catch (error) {
+          console.error('Error fetching events', error);
+          return
+        }
+      } while (nextPageToken)
+      setEvents(events);
     };
 
     loadGapi();
@@ -84,15 +119,17 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
       <div>
         <Table>
           <thead>
-            <td>Select</td>
-            <td>Since</td>
-            <td>Until</td>
-            <td>Hours</td>
-            <td>Summary</td>
+            <tr>
+              <th>Select</th>
+              <th>Since</th>
+              <th>Until</th>
+              <th>Hours</th>
+              <th>Summary</th>
+            </tr>
           </thead>
           <tbody>
             {events.map((event) => (
-              <tr>
+              <tr key={event.id}>
                 <td>
                   <InputGroup.Checkbox aria-label="Checkbox for following text input" />
                 </td>
@@ -103,7 +140,7 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
                   {new Date(event.end.dateTime).toLocaleString()}
                 </td>
                 <td>
-                  {(((new Date(event.end.dateTime).getTime())-(new Date(event.start.dateTime).getTime()))/1000/60/60).toString()}
+                  {Number(getHours(event) / 1000 / 60 / 60).toFixed(2)}
                 </td>
                 <td>
                   <Form.Control aria-label="Apperance in invoice" defaultValue={event.summary} />
