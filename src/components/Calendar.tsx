@@ -131,7 +131,7 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
             {events.map((event) => (
               <tr key={event.id}>
                 <td>
-                  <InputGroup.Checkbox aria-label="Checkbox for following text input" />
+                  <input type="checkbox" defaultChecked={true} aria-label="Checkbox for following text input" />
                 </td>
                 <td>
                   {new Date(event.start.dateTime).toLocaleString()}
