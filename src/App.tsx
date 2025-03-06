@@ -36,7 +36,9 @@ const App: React.FC = () => {
         {!token ? (
           "Please log in"
         ) : (
-          <Calendar token={token} />
+          <div className="container">
+            <Calendar token={token} />
+          </div>
         )}
       </div>    </div>
   );
