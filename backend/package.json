@@ -1,0 +1,24 @@
+{
+  "name": "robik-app-backend",
+  "version": "0.1.0",
+  "description": "Backend for robik-app",
+  "main": "server.ts",
+  "scripts": {
+    "start": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "\"Jaroslav Henner <1187265+jarovo@users.noreply.github.com>",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "axios": "^1.8.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0"
+  }
+}

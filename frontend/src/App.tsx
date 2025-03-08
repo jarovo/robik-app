@@ -4,6 +4,8 @@ import './App.css';
 import React, { useState } from 'react';
 import Calendar from './components/Calendar'; // Your component to display calendar events
 import GoogleLoginButton from './components/GoogleLoginButton';
+import Invoices from './components/Invoices';
+import FakturoidAuth from './components/FakturoidAuth';
 
 const App: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
@@ -31,7 +33,9 @@ const App: React.FC = () => {
           rel="noopener noreferrer"
         >        </a>
       </header>      
-      <div>   
+      <div>
+        <Invoices />
+        <FakturoidAuth />   
         <GoogleLoginButton onLoginSuccess={handleLoginSuccess} onLogout={handleLogout} />
         {!token ? (
           "Please log in"
