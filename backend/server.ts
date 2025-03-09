@@ -14,6 +14,44 @@ const CLIENT_ID = process.env.FAKTUROID_CLIENT_ID!;
 const CLIENT_SECRET = process.env.FAKTUROID_CLIENT_SECRET!;
 const REDIRECT_URI = process.env.FAKTUROID_REDIRECT_URI!;
 const API_BASE_URL = "https://app.fakturoid.cz";
+const FAKTUROID_API_V3_BASEURL = `${API_BASE_URL}/api/v3`
+const ACCOUNT_NAME = "jaroslavhenner"; // Change this to your account name
+const USER_AGENT = "robik-app (1187265+jarovo@users.noreply.github.com)"; // Required by Fakturoid API
+
+const invoicesHandler: RequestHandler = async (req, res) => {
+  // Get Authorization header from frontend request
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: "Missing Authorization header" });
+    return
+  }
+
+  console.log("Req headers", req.headers)
+
+  const url = `${FAKTUROID_API_V3_BASEURL}/accounts/${ACCOUNT_NAME}/invoices.json`
+  const config = {
+    headers: {
+      Authorization: authHeader,
+      "User-Agent": USER_AGENT, // Required by Fakturoid
+      "Accept": req.headers["accept"],
+    },
+  }
+
+  console.log(`Requesting ${url}`, config)
+  try {
+    const response = await axios.get(url, config);    
+    res.json(response.data);
+  } catch (error: any) {
+    console.error("Error fetching invoices:", error.response?.data, error);
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch invoices",
+      details: error.response?.data || error.message,
+    });
+  }
+};
+
+// Proxy invoices request
+app.get("/api/invoices.json", invoicesHandler);
 
 // Redirect user to Fakturoid OAuth page
 app.get("/auth/login", (req, res) => {
@@ -49,14 +87,14 @@ const authCallbackHandler: RequestHandler = async (req, res) => {
     );
 
     res.json(tokenResponse.data);
-  } catch (error) {
-    console.error("Token exchange error:", error);
+  } catch (error : any) {
+    console.error("Token exchange error:", error.response?.data || error);
     res.status(500).json({ error: "Failed to exchange code for token" });
   }
 };
 
 // ✅ Attach handler without explicit async arrow function (avoids TypeScript error)
 app.get("/auth/callback", authCallbackHandler);
-
+ 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
