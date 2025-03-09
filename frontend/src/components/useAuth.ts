@@ -12,7 +12,7 @@ export const useAuth = () => {
 
     if (code && !token) {
       axios
-        .get(`http://robik.net:3000/auth/callback?code=${code}`)
+        .get(`http://robik.net:5000/auth/callback?code=${code}`)
         .then((res) => {
           setToken(res.data.access_token);
           localStorage.setItem("fakturoid_token", res.data.access_token);
@@ -22,7 +22,7 @@ export const useAuth = () => {
     }
   }, [token]);
 
-  return { token };
+  return token;
 };
 
 export default useAuth;

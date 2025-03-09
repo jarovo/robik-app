@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "./useAuth";
 import axios from "axios";
 
 interface Invoice {
@@ -7,10 +6,14 @@ interface Invoice {
   number: String
 }
 
-const Invoices: React.FC = () => {
-  const { token } = useAuth();
+interface InvoicesProps {
+  token: string | null
+}
+
+const Invoices: React.FC<InvoicesProps> = ({token}) => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
+  console.log("Invoices got token", token)
   useEffect(() => {
     if (token) {
       axios

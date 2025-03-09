@@ -4,21 +4,20 @@ import './App.css';
 import React, { useState } from 'react';
 import Calendar from './components/Calendar'; // Your component to display calendar events
 import GoogleLoginButton from './components/GoogleLoginButton';
-import Invoices from './components/Invoices';
 import FakturoidAuth from './components/FakturoidAuth';
 
 const App: React.FC = () => {
-  const [token, setToken] = useState<string | null>(null);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
 
   const handleLoginSuccess = (credential: string) => {
     // Verify the credential on your backend and obtain an access token
     // For demonstration, we'll assume the credential is the access token
     console.log("Login success.")
-    setToken(credential);
+    setGoogleToken(credential);
   };
 
   const handleLogout = () => {
-    setToken(null)
+    setGoogleToken(null)
     console.log("Logged out.")
   }
 
@@ -34,14 +33,13 @@ const App: React.FC = () => {
         >        </a>
       </header>      
       <div>
-        <Invoices />
         <FakturoidAuth />   
         <GoogleLoginButton onLoginSuccess={handleLoginSuccess} onLogout={handleLogout} />
-        {!token ? (
+        {!googleToken ? (
           "Please log in"
         ) : (
           <div className="container">
-            <Calendar token={token} />
+            <Calendar token={googleToken} />
           </div>
         )}
       </div>    </div>
