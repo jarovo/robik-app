@@ -18,43 +18,47 @@ const FAKTUROID_API_V3_BASEURL = `${API_BASE_URL}/api/v3`
 const ACCOUNT_NAME = "jaroslavhenner"; // Change this to your account name
 const USER_AGENT = "robik-app (1187265+jarovo@users.noreply.github.com)"; // Required by Fakturoid API
 
-const authPasstroughHandler: RequestHandler = async (req, res) => {
-  // Get Authorization header from frontend request
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    res.status(401).json({ error: "Missing Authorization header" });
-    return
-  }
+const authPassTroughHandler = (resourceName: string) => {
+  const requestHandler: RequestHandler = async (req, res) => {
+    // Get Authorization header from frontend request
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      res.status(401).json({ error: "Missing Authorization header" });
+      return
+    }
 
-  console.log("Req headers", req.headers)
+    console.log("Req headers", req.headers)
 
-  const url = `${FAKTUROID_API_V3_BASEURL}/accounts/${ACCOUNT_NAME}/invoices.json`
-  const config = {
-    headers: {
-      Authorization: authHeader,
-      "User-Agent": USER_AGENT, // Required by Fakturoid
-      "Accept": req.headers["accept"],
-      "Content-Type": req.headers["Content-Type"]
+    const url = `${FAKTUROID_API_V3_BASEURL}/accounts/${ACCOUNT_NAME}/${resourceName}.json`
+    const config = {
+      headers: {
+        Authorization: authHeader,
+        "User-Agent": USER_AGENT, // Required by Fakturoid
+        "Accept": req.headers["accept"],
+        "Content-Type": req.headers["Content-Type"]
+      }
+    }
+
+    console.log(`Requesting ${url}`, config)
+    try {
+      const response = await axios.get(url, config);    
+      res.json(response.data);
+    } catch (error: any) {
+      console.error("Error fetching invoices:", error.response?.data, error);
+      res.status(error.response?.status || 500).json({
+        error: "Failed to fetch invoices",
+        details: error.response?.data || error.message,
+      });
     }
   }
 
-  console.log(`Requesting ${url}`, config)
-  try {
-    const response = await axios.get(url, config);    
-    res.json(response.data);
-  } catch (error: any) {
-    console.error("Error fetching invoices:", error.response?.data, error);
-    res.status(error.response?.status || 500).json({
-      error: "Failed to fetch invoices",
-      details: error.response?.data || error.message,
-    });
-  }
+  return requestHandler
 };
 
 // Proxy invoices request
-app.get("/api/subjects.json", authPasstroughHandler);
-app.get("/api/invoices.json", authPasstroughHandler);
-app.post("/api/invoices.json", authPasstroughHandler);
+app.get("/api/subjects.json", authPassTroughHandler("subjects"));
+app.get("/api/invoices.json", authPassTroughHandler("invoices"));
+app.post("/api/invoices.json", authPassTroughHandler("invoices"));
 
 // Redirect user to Fakturoid OAuth page
 app.get("/auth/login", (req, res) => {
