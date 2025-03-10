@@ -14,14 +14,14 @@ export const useAuth = () => {
       axios
         .get(`http://robik.net:5000/auth/callback?code=${code}`)
         .then((res) => {
+          console.log("Got token", res.data)
           setToken(res.data.access_token);
           localStorage.setItem("fakturoid_token", res.data.access_token);
           window.history.replaceState({}, document.title, "/"); // Clean URL
         })
         .catch((err) => console.error("Auth Error", err));
     }
-  }, [token]);
-
+  }, [token])
   return token;
 };
 
