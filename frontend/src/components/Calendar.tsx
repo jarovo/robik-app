@@ -19,29 +19,6 @@ interface Event {
   };
 }
 
-interface Etag {
-  etag: string
-}
-
-interface Response {
-  "kind": "calendar#events",
-  "etag": Etag,
-  "summary": string,
-  "description": string,
-  "updated": Date,
-  "timeZone": string,
-  "accessRole": string,
-  "defaultReminders": [
-    {
-      "method": string,
-      "minutes": Number
-    }
-  ],
-  "nextPageToken": string,
-  "nextSyncToken": string,
-  "items": [Event]
-}
-
 
 const getHours = (event: Event) => {
   const endTime = new Date(event.end.dateTime).getTime()
