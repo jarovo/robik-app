@@ -18,7 +18,7 @@ const FAKTUROID_API_V3_BASEURL = `${API_BASE_URL}/api/v3`
 const ACCOUNT_NAME = "jaroslavhenner"; // Change this to your account name
 const USER_AGENT = "robik-app (1187265+jarovo@users.noreply.github.com)"; // Required by Fakturoid API
 
-const invoicesHandler: RequestHandler = async (req, res) => {
+const authPasstroughHandler: RequestHandler = async (req, res) => {
   // Get Authorization header from frontend request
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -34,7 +34,8 @@ const invoicesHandler: RequestHandler = async (req, res) => {
       Authorization: authHeader,
       "User-Agent": USER_AGENT, // Required by Fakturoid
       "Accept": req.headers["accept"],
-    },
+      "Content-Type": req.headers["Content-Type"]
+    }
   }
 
   console.log(`Requesting ${url}`, config)
@@ -51,7 +52,9 @@ const invoicesHandler: RequestHandler = async (req, res) => {
 };
 
 // Proxy invoices request
-app.get("/api/invoices.json", invoicesHandler);
+app.get("/api/subjects.json", authPasstroughHandler);
+app.get("/api/invoices.json", authPasstroughHandler);
+app.post("/api/invoices.json", authPasstroughHandler);
 
 // Redirect user to Fakturoid OAuth page
 app.get("/auth/login", (req, res) => {
