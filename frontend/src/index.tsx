@@ -3,20 +3,19 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+//import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const clientId = process.env.REACT_APP_GAPI_CLIENT_ID as string;
+console.log(process.env) 
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId} >
       <App />
-    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 
