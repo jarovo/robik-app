@@ -1,6 +1,6 @@
 {
   "name": "robik-app",
-  "homepage": "https://jarovo.github.io/robik",
+  "homepage": "./",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,6 +16,7 @@
     "axios": "^1.8.2",
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
+    "fakturoid-js": "file:../../fakturoid-js",
     "gapi-script": "^1.2.0",
     "gh-pages": "^6.3.0",
     "google-auth-library": "^9.15.1",

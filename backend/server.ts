@@ -10,13 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const CLIENT_ID = process.env.REACT_APP_FAKTUROID_CLIENT_ID!;
-const CLIENT_SECRET = process.env.REACT_APP_FAKTUROID_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.REACT_APP_FAKTUROID_REDIRECT_URI!;
+const CLIENT_ID = process.env.REACT_APP_FAKTUROID_CLIENT_ID;
+const REDIRECT_URI = process.env.REACT_APP_FAKTUROID_REDIRECT_URI;
 const API_BASE_URL = "https://app.fakturoid.cz";
-const FAKTUROID_API_V3_BASEURL = `${API_BASE_URL}/api/v3`
-const ACCOUNT_NAME = "jaroslavhenner"; // Change this to your account name
-const USER_AGENT = "robik-app (1187265+jarovo@users.noreply.github.com)"; // Required by Fakturoid API
+const FAKTUROID_API_V3_BASEURL = `${API_BASE_URL}/api/v3`;
+const SLUG = process.env.REACT_APP_FAKTUROID_SLUG
+const USER_AGENT = "robik-app (1187265+jarovo@users.noreply.github.com)";
 
 const authPassTroughHandler = (resourceName: string) => {
   const requestHandler: RequestHandler = async (clientRequest, clientResponse) => {
@@ -27,10 +26,10 @@ const authPassTroughHandler = (resourceName: string) => {
       clientResponse.status(401).json({ error: "Missing Authorization header" });
       return
     }
+    
+    console.log("Req ", clientRequest.path, clientRequest.query, clientRequest.headers)
 
-    console.log("Req headers", clientRequest.headers)
-
-    const url = `${FAKTUROID_API_V3_BASEURL}/accounts/${ACCOUNT_NAME}/${resourceName}.json`
+    const url = `${FAKTUROID_API_V3_BASEURL}/accounts/${SLUG}/${resourceName}.json`
     const config = {
       headers: {
         Authorization: authHeader,

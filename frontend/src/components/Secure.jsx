@@ -19,8 +19,14 @@ export default function Secure() {
 
   return (
     <>
-      <Calendar token={googeAccessToken} />
-      <Invoices token={fakturoidAccessToken} />
+    <div className="row">
+      <div className="col">
+        <Calendar token={googeAccessToken} />
+      </div>
+      <div className="col"> 
+        <Invoices token={fakturoidAccessToken} />
+      </div>
+    </div>
     </>
   );
 }

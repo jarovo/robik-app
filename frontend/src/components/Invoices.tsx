@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Api, Namespace, Invoice } from "fakturoid-js"
 
-interface Invoice {
-  id: Number
-  number: String
-}
+import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
+import FloatingLabel from "react-bootstrap/FloatingLabel";
 
 type SubjecTypes = "customer" | "supplier" | "both"
 type AresUpdateSettings = "on" | "off"
 type WebinvoiceHistory = null | "disabled" | "recent" | "cliet_portal"
 
 interface  Subject {
-  id: Number        // 	Unique identifier in Fakturoid
+  	id: Number        // 	Unique identifier in Fakturoid
 	custom_id: string //	 	Identifier in your application
 	user_id:	Number  // 	User ID who created the subject
 	type: SubjecTypes
@@ -26,7 +26,7 @@ interface  Subject {
 	zip: string 	  // ZIP or postal code
 	country: string   // Country (ISO code)
 	has_delivery_address: Boolean   // 	Enable delivery address
-  // To be able to set delivery address in the attributes below this must be set to true. Upon setting this to false, the delivery address below is cleared.
+	// To be able to set delivery address in the attributes below this must be set to true. Upon setting this to false, the delivery address below is cleared.
 	delivery_name: string     // Delivery address name
 	delivery_street: string   // Delivery address street
 	delivery_city: string 	  // Delivery address city
@@ -48,24 +48,24 @@ interface  Subject {
 	swift_bic: 	string        // 	SWIFT/BIC
 	variable_symbol: string   // 	Fixed variable symbol (used for all invoices for this client instead of invoice number)
 	setting_update_from_ares: AresUpdateSettings // 	Whether to update subject data from ARES. Used to override account settings 
-                                               //Default: inherit Updating this will also update the deprecated ares_update attribute. If both this and the deprecated attribute are present, the new one takes precedence.
+												//Default: inherit Updating this will also update the deprecated ares_update attribute. If both this and the deprecated attribute are present, the new one takes precedence.
 	ares_update: boolean      //	Whether to update subject data from ARES. Used to override account settings
-                            // Default: true
-                            // Deprecated in favor of setting_update_from_ares
-                            // Updating this will also update the new attribute
-  setting_invoice_pdf_attachments: AresUpdateSettings // 	Whether to attach invoice PDF in email. Used to override account settings
+							// Default: true
+							// Deprecated in favor of setting_update_from_ares
+							// Updating this will also update the new attribute
+	setting_invoice_pdf_attachments: AresUpdateSettings // 	Whether to attach invoice PDF in email. Used to override account settings
 	setting_estimate_pdf_attachments: AresUpdateSettings // 	Whether to attach estimate PDF in email. Used to override account settings
 	setting_invoice_send_reminders: AresUpdateSettings //	Whether to send overdue invoice email reminders. Used to override account settings
 
 	suggestion_enabled: boolean // Suggest for documents
-                              // Default: true
+								// Default: true
 	custom_email_text:	string 	// New invoice custom email text
 	overdue_email_text:	string 	// Overdue reminder custom email text
 	invoice_from_proforma_email_text: string 	// Proforma paid custom email text
 	thank_you_email_text: string 	// Thanks for payment custom email text
 	custom_estimate_email_text: string 	// Estimate custom email text
 	webinvoice_history: WebinvoiceHistory 	// Webinvoice history
-                                          //  Default: null (inherit from account settings)
+											//  Default: null (inherit from account settings)
 	html_url: string            // 	Subject HTML web address
 	url: string                 // 	Subject API address
 	created_at:	Date        //	Date and time of subject creation
@@ -77,41 +77,63 @@ interface InvoicesProps {
 }
 
 const Invoices: React.FC<InvoicesProps> = ({token}) => {
-  const [invoices, setInvoices] = useState<Invoice[]>([])
-  const [subjects, setSubjects] = useState<Subject[]>([])
+	const [invoices, setInvoices] = useState<Invoice[]>([])
+	const [subjects, setSubjects] = useState<Subject[]>([])
+	const [invoiceNumber, setInvoiceNumber] = useState("")
+	
+	useEffect(() => {
+		if (!token) return
+		
+		const reqConfig = {headers: { Authorization: `Bearer ${token}`, 'Content-Type': "application/json", Accept: 'application/json'}}
+		const getResources = async () => {
+			const subjsResp = axios.get(`http://localhost:5000/api/subjects.json`, reqConfig)
+			const invoicesResp = axios.get(`http://localhost:5000/api/invoices.json`, reqConfig)
+			setSubjects((await subjsResp).data)
+			setInvoices((await invoicesResp).data)
+		}
 
-  useEffect(() => {
-    const reqConfig = {headers: { Authorization: `Bearer ${token}`, 'Content-Type': "application/json", Accept: 'application/json'}}
+		getResources()
+	}, [token]);
 
-    if (!token) return
+	const fillFromCalendar = () => {
+		if (!token) { throw Error("Cannot make request when token is not set.")}
 
-    const getResources = async () => {
-      const subjsResp = axios.get(`http://localhost:5000/api/subjects.json`, reqConfig)
-      const invoicesResp = axios.get(`http://localhost:5000/api/invoices.json`, reqConfig)
-      const subjects_data = (await subjsResp).data
-      console.log("This is what I got", subjects_data)
-      setSubjects(subjects_data)
-      setInvoices((await invoicesResp).data)
-    }
+		const fakturoid = new Api({
+			namespace: Namespace.development,
+			credentials: { access_token: token },
+			// slug: process.env.REACT_APP_FAKTUROID_SLUG
+		})
+		
+		const invoicesResponse = fakturoid.invoices.list({number: invoiceNumber})
+		console.log("InvoicesResponse", invoicesResponse)
+		invoicesResponse.then((data) => {
+			console.log("Resolved invoices response", data)
+		}).catch((e) => console.log("Error when getting invoices", e))
+	}
 
-    getResources()
-  }, [token]);
+	const searchInvoice = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		fillFromCalendar()
+	}
 
-  return (
-    <div>
-      <h2>Invoices</h2>
+	return (
+		<div>
+		<h2>Invoices</h2>
+		<Form onSubmit={searchInvoice}>
+			<FloatingLabel controlId="invoiceNumber" label="Invoice number" className="mb-3">
+				<Form.Control type="string" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}/>
+			</FloatingLabel>
 
-      <select className="form-select" aria-label="Subject">
-        {subjects.map((subj) => (
-          <option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
-        ))}
-      </select>
-
-      {invoices.map((invoice) => (
-        <p key={invoice.id.toString()}>{invoice.number}</p>
-      ))}
-    </div>
-  );
-};
+			<select className="form-select" aria-label="Subject">
+				{subjects.map((subj) => (
+				<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
+				))}
+			</select>
+			
+			<Button variant="primary" type="submit">Create invoice from calendar</Button>
+		</Form>
+		</div>
+	)
+}
 
 export default Invoices;
