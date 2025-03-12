@@ -108,6 +108,7 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 		console.log("InvoicesResponse", invoicesResponse)
 		invoicesResponse.then((data) => {
 			console.log("Resolved invoices response", data)
+			setInvoices(data)
 		}).catch((e) => console.log("Error when getting invoices", e))
 	}
 
@@ -115,7 +116,6 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 		event.preventDefault()
 		fillFromCalendar()
 	}
-	console.log(invoices)
 
 	return (
 		<div>
@@ -128,6 +128,12 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 			<select className="form-select" aria-label="Subject">
 				{subjects.map((subj) => (
 				<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
+				))}
+			</select>
+
+			<select className="form-select" aria-label="Invoices">
+				{invoices.map((invoice) => (
+				<option key={invoice.id.toString()} value={invoice.number.toString()}>{invoice.number}</option>
 				))}
 			</select>
 			
