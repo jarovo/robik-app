@@ -1,8 +1,11 @@
-import React, { useState, ChangeEventHandler, use, useEffect, MouseEventHandler } from "react";
+import React, { PropsWithChildren, useState, ChangeEventHandler, use, useEffect, MouseEventHandler, ReactElement } from "react";
 import { Api, Namespace, Invoice } from "fakturoid-js"
 
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
+
+import { CalendarEvents } from "./CalendarEvents";
+import { GoogleEvent } from "./Calendar";
 
 type SubjecTypes = "customer" | "supplier" | "both"
 type AresUpdateSettings = "on" | "off"
@@ -72,20 +75,21 @@ interface  Subject {
 
 interface InvoicesProps {
   accessToken: string
+  CalendarEvents: ReactElement
 }
 
-const Invoices: React.FC<InvoicesProps> = ({accessToken}) => {
+const Invoices: React.FC<PropsWithChildren<InvoicesProps>> =({accessToken, CalendarEvents}) => {
 
 	const fakturoid = new Api({
 		namespace: Namespace.development,
 		credentials: { access_token: accessToken },
 		//slug: fakturoidSlug
 	})
-
 	
 	const [subjects, setSubjects] = useState<Subject[]>([])
 	const [invoices, setInvoices] = useState<Invoice[]>([])
 	const [selectedSubject, setSelectedSubject] = useState<Number|null>(null)
+	const [events, setEvents] = useState<GoogleEvent[]>([])
 
 	useEffect(() => {
 		fakturoid.subjects.list({}).then((data) => setSubjects(data))
@@ -111,22 +115,24 @@ const Invoices: React.FC<InvoicesProps> = ({accessToken}) => {
 
 	return (
 		<div>
-		<h2>Invoices</h2>
-		<Form onSubmit={onInvoiceSubmit}>
-			<select onChange={onSubjectSelect} className="form-select" aria-label="Subject">
-				{subjects.map((subj) => (
-				<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
-				))}
-			</select>
+			<h2>Invoices</h2>
+			<Form onSubmit={onInvoiceSubmit}>
+				<select onChange={onSubjectSelect} className="form-select" aria-label="Subject">
+					{subjects.map((subj) => (
+					<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
+					))}
+				</select>
 
-			<select className="form-select" aria-label="Invoices">
-				{invoices.map((invoice) => (
-				<option key={invoice.id.toString()} value={invoice.number.toString()}>{invoice.number}</option>
-				))}
-			</select>
-			
-			<Button onClick={onPopulateButtonClick} variant="primary">Populate</Button>
-		</Form>
+				<select className="form-select" aria-label="Invoices">
+					{invoices.map((invoice) => (
+					<option key={invoice.id.toString()} value={invoice.number.toString()}>{invoice.number}</option>
+					))}
+				</select>
+				
+				<Button onClick={onPopulateButtonClick} variant="primary">Populate</Button>
+			</Form>
+
+			{CalendarEvents}
 		</div>
 	)
 }

@@ -1,14 +1,18 @@
 // Calendar.tsx
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Table from 'react-bootstrap/Table';
+import {useDraggable} from '@dnd-kit/core';
+import { CalendarEvents } from './CalendarEvents';
 
 interface CalendarProps {
-  token: string;
+  token: string
+  EventsComponent: ReactElement;
+  setCalendarEvents: (daa: GoogleEvent[]) => void;
 }
 
-interface Event {
+export interface GoogleEvent {
   id: string;
   summary: string;
   start: {
@@ -19,16 +23,7 @@ interface Event {
   };
 }
 
-
-const getHours = (event: Event) => {
-  const endTime = new Date(event.end.dateTime).getTime()
-  const startTime = new Date(event.start.dateTime).getTime()
-  return endTime - startTime
-}
-
-
-const Calendar: React.FC<CalendarProps> = ({token}) => {
-  const [events, setEvents] = useState<Event[]>([]);
+const Calendar: React.FC<CalendarProps> = ({token, EventsComponent, setCalendarEvents}) => {
   const [dateSince, setDateSince] = useState<Date>(new Date())
   const [dateUntil, setDateUntil] = useState<Date>(new Date())
   const [calendar, setCalendar] = useState('primary')
@@ -58,7 +53,7 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
 
     const listUpcomingEvents = async () => {
       let nextPageToken: string | undefined
-      let events: Array<Event> = []
+      let events: Array<GoogleEvent> = []
       do {
         try {
           const response = await window.gapi.client.calendar.events.list({
@@ -72,13 +67,13 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
             pageToken: nextPageToken
           });
           nextPageToken = response.result.nextPageToken
-          events = events.concat(response.result.items as Event[])
+          events = events.concat(response.result.items as GoogleEvent[])
         } catch (error) {
           console.error('Error fetching events', error);
           return
         }
       } while (nextPageToken)
-      setEvents(events);
+      setCalendarEvents(events);
     };
 
     loadGapi();
@@ -94,38 +89,7 @@ const Calendar: React.FC<CalendarProps> = ({token}) => {
         <label>Date until <input name="date until" type="date" onChange={e => setDateUntil(new Date(e.target.value))}/></label>
       </InputGroup>
       <div>
-        <Table>
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Since</th>
-              <th>Until</th>
-              <th>Hours</th>
-              <th>Summary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((event) => (
-              <tr key={event.id}>
-                <td>
-                  <input type="checkbox" defaultChecked={true} aria-label="Checkbox for following text input" />
-                </td>
-                <td>
-                  {new Date(event.start.dateTime).toLocaleString()}
-                </td>
-                <td>
-                  {new Date(event.end.dateTime).toLocaleString()}
-                </td>
-                <td>
-                  {Number(getHours(event) / 1000 / 60 / 60).toFixed(2)}
-                </td>
-                <td>
-                  <Form.Control aria-label="Apperance in invoice" defaultValue={event.summary} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        {EventsComponent}
       </div>
     </div>
   );
