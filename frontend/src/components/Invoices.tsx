@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, ChangeEventHandler, use, useEffect, MouseEventHandler } from "react";
 import { Api, Namespace, Invoice } from "fakturoid-js"
 
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
-import FloatingLabel from "react-bootstrap/FloatingLabel";
 
 type SubjecTypes = "customer" | "supplier" | "both"
 type AresUpdateSettings = "on" | "off"
@@ -73,59 +71,49 @@ interface  Subject {
 }
 
 interface InvoicesProps {
-  token: string | null
+  accessToken: string
 }
 
-const Invoices: React.FC<InvoicesProps> = ({token}) => {
-	const [invoices, setInvoices] = useState<Invoice[]>([])
-	const [subjects, setSubjects] = useState<Subject[]>([])
-	const [invoiceNumber, setInvoiceNumber] = useState("")
+const Invoices: React.FC<InvoicesProps> = ({accessToken}) => {
+
+	const fakturoid = new Api({
+		namespace: Namespace.development,
+		credentials: { access_token: accessToken },
+		//slug: fakturoidSlug
+	})
+
 	
+	const [subjects, setSubjects] = useState<Subject[]>([])
+	const [invoices, setInvoices] = useState<Invoice[]>([])
+	const [selectedSubject, setSelectedSubject] = useState<Number|null>(null)
+
 	useEffect(() => {
-		if (!token) return
-		
-		const reqConfig = {headers: { Authorization: `Bearer ${token}`, 'Content-Type': "application/json", Accept: 'application/json'}}
-		const getResources = async () => {
-			const subjsResp = axios.get(`/api/v3/accounts/jaroslavhenner/subjects.json`, reqConfig)
-			const invoicesResp = axios.get(`/api/v3/accounts/jaroslavhenner/invoices.json`, reqConfig)
-			setSubjects((await subjsResp).data)
-			setInvoices((await invoicesResp).data)
-		}
+		fakturoid.subjects.list({}).then((data) => setSubjects(data))
+	}, [])
 
-		getResources()
-	}, [token]);
-
-	const fillFromCalendar = () => {
-		if (!token) { throw Error("Cannot make request when token is not set.")}
-
-		const fakturoid = new Api({
-			namespace: Namespace.development,
-			credentials: { access_token: token },
-			// slug: process.env.REACT_APP_FAKTUROID_SLUG
-		})
-		
-		const invoicesResponse = fakturoid.invoices.list({number: invoiceNumber})
-		console.log("InvoicesResponse", invoicesResponse)
-		invoicesResponse.then((data) => {
-			console.log("Resolved invoices response", data)
-			setInvoices(data)
-		}).catch((e) => console.log("Error when getting invoices", e))
+	const onSubjectSelect: ChangeEventHandler<HTMLSelectElement> = (e) => {
+		console.log("ChangeEvent", e.target.value)
+		const selected = Number(e.target.value)
+		setSelectedSubject(selected)
+		fakturoid.invoices.list({subject_id: selected}).then((data) => {setInvoices(data)})
 	}
 
-	const searchInvoice = (event: React.FormEvent<HTMLFormElement>) => {
+	const onPopulateButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
+		console.log("MouseEvent", e)
+		const selected = Number(e.target)
+		setSelectedSubject(selected)
+		setInvoices(use(fakturoid.invoices.list({subject_id: selected})))
+	}
+
+	const onInvoiceSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		fillFromCalendar()
 	}
 
 	return (
 		<div>
 		<h2>Invoices</h2>
-		<Form onSubmit={searchInvoice}>
-			<FloatingLabel controlId="invoiceNumber" label="Invoice number" className="mb-3">
-				<Form.Control type="string" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}/>
-			</FloatingLabel>
-
-			<select className="form-select" aria-label="Subject">
+		<Form onSubmit={onInvoiceSubmit}>
+			<select onChange={onSubjectSelect} className="form-select" aria-label="Subject">
 				{subjects.map((subj) => (
 				<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
 				))}
@@ -137,7 +125,7 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 				))}
 			</select>
 			
-			<Button variant="primary" type="submit">Create invoice from calendar</Button>
+			<Button onClick={onPopulateButtonClick} variant="primary">Populate</Button>
 		</Form>
 		</div>
 	)
