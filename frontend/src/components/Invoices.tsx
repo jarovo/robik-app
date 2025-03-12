@@ -86,8 +86,8 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 		
 		const reqConfig = {headers: { Authorization: `Bearer ${token}`, 'Content-Type': "application/json", Accept: 'application/json'}}
 		const getResources = async () => {
-			const subjsResp = axios.get(`http://localhost:5000/api/subjects.json`, reqConfig)
-			const invoicesResp = axios.get(`http://localhost:5000/api/invoices.json`, reqConfig)
+			const subjsResp = axios.get(`/api/v3/accounts/jaroslavhenner/subjects.json`, reqConfig)
+			const invoicesResp = axios.get(`/api/v3/accounts/jaroslavhenner/invoices.json`, reqConfig)
 			setSubjects((await subjsResp).data)
 			setInvoices((await invoicesResp).data)
 		}
@@ -115,6 +115,7 @@ const Invoices: React.FC<InvoicesProps> = ({token}) => {
 		event.preventDefault()
 		fillFromCalendar()
 	}
+	console.log(invoices)
 
 	return (
 		<div>

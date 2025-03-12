@@ -21,13 +21,16 @@ export default function FakturoidLogin() {
   };
 
   const getToken = (code: string) => {
-    const tokenUrl = `http://localhost:5000/auth/token`
-    const creds = Buffer.from(`${process.env.REACT_APP_FAKTUROID_CLIENT_ID}:${process.env.REACT_APP_FAKTUROID_CLIENT_SECRET}`, 'utf-8').toString('base64');
+    const tokenUrl = `/api/v3/oauth/token`
+    const clientId = process.env.REACT_APP_FAKTUROID_CLIENT_ID
+    const clientSecret = process.env.REACT_APP_FAKTUROID_CLIENT_SECRET
+    console.log("Using client id and secret", clientId, clientSecret)
+    const creds = Buffer.from(`${clientId}:${clientSecret}`, 'utf-8').toString('base64');
     const config = { headers: {
-      "user-agent": "robik-app",
-      "content-type": "application/json",
-      "accept": "application/json",
-      "authorization": `Basic ${creds}`
+      "User-Agent": "robik-app (1187265+jarovo@users.noreply.github.com)",
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Basic ${creds}`
     }}
     const data = {
       grant_type: "authorization_code",
