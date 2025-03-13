@@ -38,10 +38,14 @@ export default function Secure() {
     <DndContext onDragEnd={handleDragEnd}>
       <div className="row">
         <div className="col">
-          <Calendar token={googleAccessToken!} setCalendarEvents={setGoogleEvents} EventsComponent={<CalendarEvents id="google-cal-events" events={googleEvents}/>} />
+          <Calendar token={googleAccessToken!}
+            setCalendarEvents={setGoogleEvents}
+            EventsComponent={<CalendarEvents id="google-cal-events" events={googleEvents}/>} />
         </div>
         <div className="col"> 
-          <Invoices accessToken={fakturoidAccessToken!} CalendarEvents={<CalendarEvents id="invoice-events" events={invoiceEvents}/>} />
+          <Invoices
+            accessToken={fakturoidAccessToken!} 
+            CalendarEvents={<CalendarEvents id="invoice-events" events={invoiceEvents}/>} />
         </div>
       </div>
     </DndContext>

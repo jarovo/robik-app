@@ -6,6 +6,8 @@ import Form from 'react-bootstrap/Form'
 
 import { CalendarEvents } from "./CalendarEvents";
 import { GoogleEvent } from "./Calendar";
+import { FloatingLabel, FormLabel, InputGroup } from "react-bootstrap";
+import InputGroupText from "react-bootstrap/esm/InputGroupText";
 
 type SubjecTypes = "customer" | "supplier" | "both"
 type AresUpdateSettings = "on" | "off"
@@ -96,43 +98,41 @@ const Invoices: React.FC<PropsWithChildren<InvoicesProps>> =({accessToken, Calen
 	}, [])
 
 	const onSubjectSelect: ChangeEventHandler<HTMLSelectElement> = (e) => {
-		console.log("ChangeEvent", e.target.value)
 		const selected = Number(e.target.value)
 		setSelectedSubject(selected)
 		fakturoid.invoices.list({subject_id: selected}).then((data) => {setInvoices(data)})
 	}
 
-	const onPopulateButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-		console.log("MouseEvent", e)
-		const selected = Number(e.target)
-		setSelectedSubject(selected)
-		setInvoices(use(fakturoid.invoices.list({subject_id: selected})))
-	}
-
-	const onInvoiceSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-	}
-
 	return (
 		<div>
-			<h2>Invoices</h2>
-			<Form onSubmit={onInvoiceSubmit}>
-				<select onChange={onSubjectSelect} className="form-select" aria-label="Subject">
-					{subjects.map((subj) => (
-					<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
-					))}
-				</select>
+			<h2>Invoice</h2>
+			<Form>
+				<InputGroup className="mb-3">
+					<InputGroup.Text>Subject name</InputGroup.Text>
+					<select onChange={onSubjectSelect} className="form-select" aria-label="Subject">
+						{subjects.map((subj) => (
+						<option key={subj.id.toString()} value={subj.id.toString()}>{subj.name}</option>
+						))}
+					</select>
 
-				<select className="form-select" aria-label="Invoices">
-					{invoices.map((invoice) => (
-					<option key={invoice.id.toString()} value={invoice.number.toString()}>{invoice.number}</option>
-					))}
-				</select>
+					<InputGroup.Text>Invoice number</InputGroup.Text>
+					<select className="form-select" aria-label="Invoices">
+						{invoices.map((invoice) => (
+						<option key={invoice.id.toString()} value={invoice.number.toString()}>{invoice.number}</option>
+						))}
+					</select>
+				</InputGroup>
 				
-				<Button onClick={onPopulateButtonClick} variant="primary">Populate</Button>
-			</Form>
+				<InputGroup className="mb-3">
+					<InputGroup.Text>Default price per hour</InputGroup.Text>
+					<Form.Control aria-label="Price per hour" />
+					<InputGroup.Text>/hour</InputGroup.Text>
+				</InputGroup>
 
-			{CalendarEvents}
+				<Button variant="primary">Update Fakturoid</Button>
+
+				{CalendarEvents}
+			</Form>
 		</div>
 	)
 }
